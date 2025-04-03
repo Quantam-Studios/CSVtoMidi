@@ -1,67 +1,109 @@
 package edu.gz.CSVtoMidi;
 
 import javax.sound.midi.*;
+import java.io.File;
 import java.util.List;
 
 public class Main {
-	public static void main(String[] args) {
-		try {
-			List<MidiEventData> midiEvents = null;
-			try {
-				midiEvents = MidiCsvParser.parseCsv("C:/Users/Grady/eclipse-workspace/CSVtoMidi/src/edu/gz/CSVtoMidi/mystery_song.csv");
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+    public static void main(String[] args) throws MidiUnavailableException, InterruptedException {    	
+        try {
+            List<MidiEventData> midiEvents = null;
+            try {
+                String filePath = new File("src/edu/gz/CSVtoMidi/mystery_song.csv").getAbsolutePath();
+                midiEvents = MidiCsvParser.parseCsv(filePath);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
+            
+            for (MidiEventData event : midiEvents) {
+                System.out.println("Parsed Event - Tick: " + event.getStartEndTick() +
+                                   ", Note: " + event.getNote() +
+                                   ", Velocity: " + event.getVelocity() +
+                                   ", Channel: " + event.getChannel() +
+                                   ", NoteOn/Off: " + event.getNoteOnOff());
+            }
 
-			Sequence sequence = new Sequence(Sequence.PPQ, 384);
-			Track track = sequence.createTrack();
+            if (midiEvents == null || midiEvents.isEmpty()) {
+                System.out.println("No MIDI events loaded.");
+                return;
+            }
 
-			MidiEventFactoryAbstract factoryAbstract = new StandardMidiEventFactoryAbstract();
-			// MidiEventFactoryAbstract factoryAbstract = new
-			// LegatoMidiEventFactoryAbstract();
-			// MidiEventFactoryAbstract factoryAbstract = new
-			// StaccatoMidiEventFactoryAbstract();
+            Sequence sequence = new Sequence(Sequence.PPQ, 384);
+            Track track = sequence.createTrack();
 
-			MidiEventFactory factory = factoryAbstract.createFactory();
+            MidiEventFactoryAbstract factoryAbstract = new StandardMidiEventFactoryAbstract();
+            MidiEventFactory factory = factoryAbstract.createFactory();
 
-			// Choose an instrument strategy (e.g., Trumpet, Bass Guitar, Piano)
-			InstrumentStrategy instrumentStrategy = new ElectricBassGuitarStrategy();
-			instrumentStrategy.applyInstrument(track, 0);
+            // Set instruments
+            InstrumentStrategy instrumentStrategy = new ElectricBassGuitarStrategy();
+            instrumentStrategy.applyInstrument(track, 0);
 
-			instrumentStrategy = new TrumpetStrategy();
-			instrumentStrategy.applyInstrument(track, 1);
+            instrumentStrategy = new TrumpetStrategy();
+            instrumentStrategy.applyInstrument(track, 1);
 
-			// Choose a pitch strategy (e.g., Higher Pitch, Lower Pitch)
-			PitchStrategy pitchStrategy = new HigherPitchStrategy();
+            // Set pitch
+            PitchStrategy pitchStrategy = new HigherPitchStrategy();
 
-			for (MidiEventData event : midiEvents) {
-				int modifiedNote = pitchStrategy.modifyPitch(event.getNote());
-				// Modify pitch multiple times for a higher pitch
-				modifiedNote = pitchStrategy.modifyPitch(modifiedNote);
+            // Add events
+            for (MidiEventData event : midiEvents) {
+                int modifiedNote = pitchStrategy.modifyPitch(event.getNote());
+                modifiedNote = pitchStrategy.modifyPitch(modifiedNote);
 
-				if (event.getNoteOnOff() == ShortMessage.NOTE_ON) {
-					track.add(factory.createNoteOn(event.getStartEndTick(), modifiedNote, event.getVelocity(),
-							event.getChannel()));
-				} else {
-					track.add(factory.createNoteOff(event.getStartEndTick(), modifiedNote, event.getChannel()));
-				}
-			}
+                if (modifiedNote < 0) modifiedNote = 0;
+                if (modifiedNote > 127) modifiedNote = 127;
 
-			// Playing the sequence
-			Sequencer sequencer = MidiSystem.getSequencer();
-			sequencer.open();
-			sequencer.setSequence(sequence);
-			sequencer.start();
+                int velocity = Math.max(event.getVelocity(), 50); // Ensure it's audible
 
-			while (sequencer.isRunning() || sequencer.isOpen()) {
-				Thread.sleep(100);
-			}
+                if (event.getNoteOnOff() == ShortMessage.NOTE_ON) {
+                    track.add(factory.createNoteOn(event.getStartEndTick(), modifiedNote, velocity, event.getChannel()));
+                } else {
+                    track.add(factory.createNoteOff(event.getStartEndTick(), modifiedNote, event.getChannel()));
+                }
+            }
 
-			Thread.sleep(500);
-			sequencer.close();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+            System.out.println("Track size: " + track.size());
+            if (track.size() == 0) {
+                System.out.println("No notes were added. Check your MIDI processing logic.");
+                return;
+            }
+
+            // Play MIDI
+            Sequencer sequencer = MidiSystem.getSequencer(false);
+            if (sequencer == null) {
+                System.out.println("No MIDI sequencer available.");
+                return;
+            }
+
+            Synthesizer synthesizer = MidiSystem.getSynthesizer();
+            if (synthesizer == null) {
+                System.out.println("No MIDI synthesizer available.");
+                return;
+            }
+
+            synthesizer.open();
+            Receiver receiver = synthesizer.getReceiver();
+            sequencer.getTransmitter().setReceiver(receiver);
+            sequencer.open();
+
+            if (!sequencer.isOpen() || !sequencer.isRunning()) {
+                System.out.println("Sequencer failed to start.");
+            }
+            
+            sequencer.setSequence(sequence);
+            sequencer.start();
+
+            // Keep it playing until done
+            while (sequencer.isRunning()) {
+                Thread.sleep(100);
+            }
+
+            Thread.sleep(500);
+            sequencer.close();
+            synthesizer.close();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
