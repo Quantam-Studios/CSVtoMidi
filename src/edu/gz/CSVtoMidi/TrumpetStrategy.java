@@ -12,6 +12,7 @@ import javax.sound.midi.Track;
  * @param channel The MIDI channel to apply the instrument change.
  */
 public class TrumpetStrategy implements InstrumentStrategy {
+	@Override
 	public void applyInstrument(Track track, int channel) {
 		try {
 			ShortMessage message = new ShortMessage();

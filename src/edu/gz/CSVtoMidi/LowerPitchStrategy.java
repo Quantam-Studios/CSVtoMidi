@@ -12,6 +12,7 @@ public class LowerPitchStrategy implements PitchStrategy {
      * @param note The original MIDI note value.
      * @return The modified MIDI note value, decreasing by 2.
      */
+	@Override
     public int modifyPitch(int note) {
         note -= 2;
         return note;
