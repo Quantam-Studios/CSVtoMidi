@@ -11,9 +11,9 @@ public class StandardMidiEventFactory implements MidiEventFactory {
      * Creates a MIDI Note On event.
      *
      * @param tick     The timestamp (in MIDI ticks) when the event occurs.
-     * @param note     The MIDI note number (0-127), where 60 represents middle C.
-     * @param velocity The velocity (0-127), representing the intensity of the note.
-     * @param channel  The MIDI channel (0-15) on which the event is sent.
+     * @param note     The MIDI note number.
+     * @param velocity The velocity representing the intensity of the note.
+     * @param channel  The MIDI channel on which the event is sent.
      * @return A {@link MidiEvent} representing the Note On message.
      * @throws InvalidMidiDataException If the provided MIDI data is invalid.
      */
@@ -28,9 +28,9 @@ public class StandardMidiEventFactory implements MidiEventFactory {
     /**
      * Creates a MIDI Note Off event.
      *
-     * @param tick    The timestamp (in MIDI ticks) when the event occurs.
-     * @param note    The MIDI note number (0-127), where 60 represents middle C.
-     * @param channel The MIDI channel (0-15) on which the event is sent.
+     * @param tick    The timestamp (in MIDI ticks) when the original Note Off event would occur.
+     * @param note    The MIDI note number.
+     * @param channel The MIDI channel on which the event is sent.
      * @return A {@link MidiEvent} representing the Note Off message.
      * @throws InvalidMidiDataException If the provided MIDI data is invalid.
      */
