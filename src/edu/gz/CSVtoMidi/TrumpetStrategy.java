@@ -11,8 +11,9 @@ import javax.sound.midi.Track;
  * @param track The MIDI track to which the instrument change should be applied.
  * @param channel The MIDI channel to apply the instrument change.
  */
-public class TrumpetStrategy {
-	void applyInstrument(Track track, int channel) {
+public class TrumpetStrategy implements InstrumentStrategy {
+	@Override
+	public void applyInstrument(Track track, int channel) {
 		try {
 			ShortMessage message = new ShortMessage();
 			message.setMessage(ShortMessage.PROGRAM_CHANGE, channel, 56, 0);
