@@ -15,14 +15,6 @@ public class Main {
                 e.printStackTrace();
                 return;
             }
-            
-            for (MidiEventData event : midiEvents) {
-                System.out.println("Parsed Event - Tick: " + event.getStartEndTick() +
-                                   ", Note: " + event.getNote() +
-                                   ", Velocity: " + event.getVelocity() +
-                                   ", Channel: " + event.getChannel() +
-                                   ", NoteOn/Off: " + event.getNoteOnOff());
-            }
 
             if (midiEvents == null || midiEvents.isEmpty()) {
                 System.out.println("No MIDI events loaded.");
@@ -85,10 +77,6 @@ public class Main {
             Receiver receiver = synthesizer.getReceiver();
             sequencer.getTransmitter().setReceiver(receiver);
             sequencer.open();
-
-            if (!sequencer.isOpen() || !sequencer.isRunning()) {
-                System.out.println("Sequencer failed to start.");
-            }
             
             sequencer.setSequence(sequence);
             sequencer.start();
