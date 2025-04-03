@@ -8,7 +8,7 @@ public class Main {
 		try {
 			List<MidiEventData> midiEvents = null;
 			try {
-				midiEvents = MidiCsvParser.parseCsv("./files/mysterysong.csv");
+				midiEvents = MidiCsvParser.parseCsv("C:/Users/Grady/eclipse-workspace/CSVtoMidi/src/edu/gz/CSVtoMidi/mystery_song.csv");
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
