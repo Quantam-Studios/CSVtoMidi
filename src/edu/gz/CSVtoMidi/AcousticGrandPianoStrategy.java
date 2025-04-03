@@ -11,8 +11,8 @@ import javax.sound.midi.Track;
  * @param track The MIDI track to which the instrument change should be applied.
  * @param channel The MIDI channel to apply the instrument change.
  */
-public class AcousticGrandPianoStrategy {
-	void applyInstrument(Track track, int channel) {
+public class AcousticGrandPianoStrategy implements InstrumentStrategy {
+	public void applyInstrument(Track track, int channel) {
 		try {
 			ShortMessage message = new ShortMessage();
 			message.setMessage(ShortMessage.PROGRAM_CHANGE, channel, 0, 0);
