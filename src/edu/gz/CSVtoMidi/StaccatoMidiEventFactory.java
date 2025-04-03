@@ -9,7 +9,7 @@ import javax.sound.midi.ShortMessage;
  * The Note Off event occurs 120 ticks earlier than usual to introduce a gap
  * before the next Note On event.
  */
-public class StacattoMidiEventFactory implements MidiEventFactory {
+public class StaccatoMidiEventFactory implements MidiEventFactory {
     
 	/**
      * Creates a MIDI Note On event.
